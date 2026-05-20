@@ -1,0 +1,791 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>郑州英语单词挖宝</title>
+  <style>
+    :root {
+      --sky: #dff4ff;
+      --field: #f4d58d;
+      --soil: #8b5a2b;
+      --soil-dark: #68401e;
+      --leaf: #3a8b5a;
+      --leaf-dark: #1f6540;
+      --red: #d84735;
+      --gold: #f8bc3b;
+      --ink: #243244;
+      --muted: #697687;
+      --white: #fffdf8;
+      --line: rgba(36, 50, 68, 0.16);
+      --shadow: 0 18px 45px rgba(61, 42, 22, 0.16);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, rgba(223, 244, 255, 0.95) 0 38%, rgba(255, 241, 194, 0.92) 38% 100%),
+        radial-gradient(circle at 20% 18%, rgba(255,255,255,0.9), transparent 18rem);
+      overflow-x: hidden;
+    }
+
+    .app {
+      width: min(1180px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 18px 0 28px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: center;
+      padding: 14px 0 12px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 5vw, 54px);
+      line-height: 1.04;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 8px 0 0;
+      max-width: 720px;
+      font-size: 16px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 110px;
+      height: 42px;
+      padding: 0 16px;
+      border: 2px solid var(--ink);
+      border-radius: 999px;
+      background: var(--white);
+      box-shadow: 4px 4px 0 rgba(36, 50, 68, 0.14);
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .scene {
+      position: relative;
+      min-height: 145px;
+      margin: 4px 0 14px;
+      overflow: hidden;
+      border-bottom: 5px solid rgba(74, 123, 75, 0.34);
+    }
+
+    .sun {
+      position: absolute;
+      right: 7%;
+      top: 10px;
+      width: 86px;
+      height: 86px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 0 12px rgba(248, 188, 59, 0.22);
+    }
+
+    .tower {
+      position: absolute;
+      left: 8%;
+      bottom: 0;
+      width: 110px;
+      height: 128px;
+    }
+
+    .tower::before,
+    .tower::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 42px solid transparent;
+      border-right: 42px solid transparent;
+    }
+
+    .tower::before {
+      bottom: 0;
+      border-bottom: 118px solid #bc7545;
+    }
+
+    .tower::after {
+      bottom: 44px;
+      border-bottom: 74px solid #e0a45e;
+      opacity: 0.95;
+    }
+
+    .tower-cap {
+      position: absolute;
+      left: 20px;
+      top: 4px;
+      width: 70px;
+      height: 22px;
+      border-radius: 50% 50% 0 0;
+      background: var(--red);
+      z-index: 2;
+    }
+
+    .river {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 38px;
+      background: repeating-linear-gradient(120deg, #63bdd2 0 32px, #8bd5e5 32px 64px);
+      clip-path: polygon(0 46%, 13% 38%, 25% 62%, 40% 42%, 57% 56%, 74% 34%, 100% 50%, 100% 100%, 0 100%);
+      opacity: 0.9;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(330px, 1fr) 340px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .game-area,
+    .side {
+      background: rgba(255, 253, 248, 0.82);
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .game-area {
+      padding: 16px;
+    }
+
+    .status {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .metric {
+      min-height: 72px;
+      padding: 10px;
+      border: 2px solid rgba(36, 50, 68, 0.12);
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    .metric span {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    .metric strong {
+      font-size: 25px;
+      line-height: 1;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(48px, 1fr));
+      gap: 10px;
+      aspect-ratio: 5 / 4;
+      min-height: 318px;
+    }
+
+    .tile {
+      position: relative;
+      display: grid;
+      place-items: center;
+      border: 0;
+      border-radius: 8px;
+      background: linear-gradient(160deg, #a66a34, var(--soil));
+      box-shadow: inset 0 -8px 0 rgba(0,0,0,0.12), 0 5px 0 var(--soil-dark);
+      color: #fff;
+      font-size: clamp(20px, 3vw, 31px);
+      cursor: pointer;
+      transition: transform 150ms ease, filter 150ms ease;
+      overflow: hidden;
+      font-weight: 900;
+    }
+
+    .tile::before {
+      content: "";
+      position: absolute;
+      inset: 8px;
+      border-radius: 7px;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.13), transparent 42%),
+        repeating-linear-gradient(35deg, rgba(255,255,255,0.08) 0 7px, transparent 7px 18px);
+    }
+
+    .tile:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.05);
+    }
+
+    .tile:disabled {
+      cursor: default;
+      transform: none;
+    }
+
+    .tile.dug {
+      background: #f3e6c8;
+      color: var(--ink);
+      box-shadow: inset 0 0 0 2px rgba(104, 64, 30, 0.18);
+    }
+
+    .tile.dug::before {
+      opacity: 0;
+    }
+
+    .tile .mark {
+      position: relative;
+      z-index: 1;
+      width: 80%;
+      max-width: 82px;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.84);
+      box-shadow: inset 0 0 0 2px rgba(36, 50, 68, 0.09);
+    }
+
+    .side {
+      padding: 16px;
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .panel-title h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .prompt {
+      min-height: 124px;
+      padding: 14px;
+      border-radius: 8px;
+      background: #ffffff;
+      border: 2px dashed rgba(36, 50, 68, 0.22);
+    }
+
+    .prompt small {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .word {
+      margin: 8px 0 4px;
+      font-size: 38px;
+      font-weight: 900;
+      color: var(--red);
+      line-height: 1.1;
+    }
+
+    .meaning {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .choices {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .choice {
+      min-height: 48px;
+      padding: 8px 12px;
+      border: 2px solid rgba(36, 50, 68, 0.16);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      text-align: left;
+      transition: border-color 140ms ease, transform 140ms ease, background 140ms ease;
+    }
+
+    .choice:hover:not(:disabled) {
+      border-color: var(--leaf);
+      transform: translateX(3px);
+    }
+
+    .choice.correct {
+      background: #e7f6df;
+      border-color: var(--leaf);
+    }
+
+    .choice.wrong {
+      background: #ffe3df;
+      border-color: var(--red);
+    }
+
+    .choice:disabled {
+      cursor: default;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .action {
+      min-height: 46px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--leaf);
+      color: #fff;
+      font-weight: 900;
+      font-size: 15px;
+      cursor: pointer;
+      box-shadow: 0 5px 0 var(--leaf-dark);
+    }
+
+    .action.secondary {
+      background: var(--gold);
+      color: #422a11;
+      box-shadow: 0 5px 0 #c78913;
+    }
+
+    .treasure-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 9px;
+      margin-top: 14px;
+    }
+
+    .treasure {
+      min-height: 72px;
+      padding: 8px 6px;
+      border-radius: 8px;
+      background: #fff;
+      border: 2px solid rgba(36, 50, 68, 0.12);
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.25;
+    }
+
+    .treasure b {
+      display: block;
+      font-size: 28px;
+      margin-bottom: 4px;
+      filter: grayscale(1);
+      opacity: 0.35;
+    }
+
+    .treasure.found {
+      color: var(--ink);
+      border-color: rgba(58, 139, 90, 0.45);
+      background: #f6fff1;
+    }
+
+    .treasure.found b {
+      filter: none;
+      opacity: 1;
+    }
+
+    .message {
+      min-height: 40px;
+      margin-top: 12px;
+      color: var(--ink);
+      font-weight: 800;
+      line-height: 1.45;
+    }
+
+    .footer-note {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 900px) {
+      .topbar {
+        grid-template-columns: 1fr;
+      }
+
+      .badge {
+        width: max-content;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .side {
+        order: -1;
+      }
+
+      .status {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 520px) {
+      .app {
+        width: min(100% - 18px, 1180px);
+        padding-top: 10px;
+      }
+
+      .scene {
+        min-height: 112px;
+      }
+
+      .sun {
+        width: 62px;
+        height: 62px;
+      }
+
+      .tower {
+        transform: scale(0.78);
+        transform-origin: left bottom;
+      }
+
+      .game-area,
+      .side {
+        padding: 12px;
+      }
+
+      .board {
+        grid-template-columns: repeat(4, minmax(54px, 1fr));
+        aspect-ratio: auto;
+        min-height: auto;
+      }
+
+      .tile {
+        min-height: 68px;
+      }
+
+      .actions {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div>
+        <h1>郑州英语单词挖宝</h1>
+        <p class="subtitle">点开土地格子，读英文单词，根据中文提示选答案。答对越多，越快找到黄河、二七塔和少林功夫宝物。</p>
+      </div>
+      <div class="badge" id="levelBadge">第 1 关</div>
+    </header>
+
+    <section class="scene" aria-label="郑州主题场景">
+      <div class="sun"></div>
+      <div class="tower"><div class="tower-cap"></div></div>
+      <div class="river"></div>
+    </section>
+
+    <section class="layout">
+      <div class="game-area">
+        <div class="status">
+          <div class="metric"><span>星星</span><strong id="score">0</strong></div>
+          <div class="metric"><span>宝物</span><strong id="treasures">0/6</strong></div>
+          <div class="metric"><span>连对</span><strong id="streak">0</strong></div>
+          <div class="metric"><span>剩余</span><strong id="left">20</strong></div>
+        </div>
+        <div class="board" id="board" aria-label="挖宝地图"></div>
+      </div>
+
+      <aside class="side">
+        <div class="panel-title">
+          <h2>单词挑战</h2>
+          <span class="badge" id="modeBadge">准备</span>
+        </div>
+
+        <div class="prompt">
+          <small id="hintLabel">先点一个土地格子</small>
+          <div class="word" id="word">Dig!</div>
+          <p class="meaning" id="meaning">每块土地下面可能藏着单词、星星或郑州小宝物。</p>
+        </div>
+
+        <div class="choices" id="choices"></div>
+
+        <div class="actions">
+          <button class="action" id="nextBtn" type="button">换一张地图</button>
+          <button class="action secondary" id="soundBtn" type="button">读单词</button>
+        </div>
+
+        <div class="treasure-list" id="treasureList"></div>
+        <div class="message" id="message">准备好了吗？从地图里挖出第一个英文单词吧。</div>
+        <p class="footer-note">单词难度按小学三年级常见主题设计：颜色、动物、食物、家庭、学校、动作和郑州生活场景。</p>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const wordBank = [
+      { word: "river", cn: "河流", clue: "郑州北边有一条很有名的大河。" },
+      { word: "tower", cn: "塔", clue: "二七纪念塔里的 tower 是这个意思。" },
+      { word: "train", cn: "火车", clue: "郑州是重要的铁路城市。" },
+      { word: "school", cn: "学校", clue: "每天背着书包去的地方。" },
+      { word: "pencil", cn: "铅笔", clue: "写英语单词常用它。" },
+      { word: "book", cn: "书", clue: "里面有故事和知识。" },
+      { word: "apple", cn: "苹果", clue: "红红的水果。" },
+      { word: "noodle", cn: "面条", clue: "烩面里常见的长长食物。" },
+      { word: "water", cn: "水", clue: "口渴时最需要。" },
+      { word: "yellow", cn: "黄色", clue: "黄河的 yellow 是这个颜色。" },
+      { word: "green", cn: "绿色", clue: "树叶和草地常见的颜色。" },
+      { word: "red", cn: "红色", clue: "国旗的主要颜色。" },
+      { word: "friend", cn: "朋友", clue: "一起玩、一起学习的人。" },
+      { word: "family", cn: "家庭", clue: "爸爸妈妈和孩子组成它。" },
+      { word: "mother", cn: "妈妈", clue: "mum 的正式说法。" },
+      { word: "father", cn: "爸爸", clue: "dad 的正式说法。" },
+      { word: "teacher", cn: "老师", clue: "帮助你学习的人。" },
+      { word: "student", cn: "学生", clue: "在学校学习的人。" },
+      { word: "happy", cn: "开心的", clue: "找到宝藏时的心情。" },
+      { word: "strong", cn: "强壮的", clue: "少林功夫让人想到这个词。" },
+      { word: "jump", cn: "跳", clue: "体育课上常做的动作。" },
+      { word: "run", cn: "跑", clue: "操场上快速移动。" },
+      { word: "sing", cn: "唱歌", clue: "音乐课上会做的事。" },
+      { word: "draw", cn: "画画", clue: "美术课上会做的事。" }
+    ];
+
+    const treasures = [
+      { icon: "🏯", name: "二七塔" },
+      { icon: "🌊", name: "黄河浪花" },
+      { icon: "🚆", name: "郑州火车" },
+      { icon: "🥣", name: "烩面碗" },
+      { icon: "🥋", name: "功夫徽章" },
+      { icon: "📚", name: "单词书" }
+    ];
+
+    const state = {
+      score: 0,
+      streak: 0,
+      level: 1,
+      dug: 0,
+      found: new Set(),
+      current: null,
+      locked: false,
+      tiles: []
+    };
+
+    const board = document.getElementById("board");
+    const choicesEl = document.getElementById("choices");
+    const scoreEl = document.getElementById("score");
+    const treasuresEl = document.getElementById("treasures");
+    const streakEl = document.getElementById("streak");
+    const leftEl = document.getElementById("left");
+    const wordEl = document.getElementById("word");
+    const meaningEl = document.getElementById("meaning");
+    const hintLabel = document.getElementById("hintLabel");
+    const messageEl = document.getElementById("message");
+    const levelBadge = document.getElementById("levelBadge");
+    const modeBadge = document.getElementById("modeBadge");
+    const treasureList = document.getElementById("treasureList");
+
+    function shuffle(items) {
+      return [...items].sort(() => Math.random() - 0.5);
+    }
+
+    function pickWords(count) {
+      return shuffle(wordBank).slice(0, count);
+    }
+
+    function makeTiles() {
+      const words = pickWords(12).map((item) => ({ type: "word", item }));
+      const stars = Array.from({ length: 5 }, () => ({ type: "star" }));
+      const treasureIndex = state.found.size < treasures.length ? state.found.size : Math.floor(Math.random() * treasures.length);
+      const treasure = [{ type: "treasure", item: treasures[treasureIndex], index: treasureIndex }];
+      const empty = Array.from({ length: 2 }, () => ({ type: "empty" }));
+      return shuffle([...words, ...stars, ...treasure, ...empty]);
+    }
+
+    function renderTreasures() {
+      treasureList.innerHTML = "";
+      treasures.forEach((item, index) => {
+        const div = document.createElement("div");
+        div.className = "treasure" + (state.found.has(index) ? " found" : "");
+        div.innerHTML = `<b>${item.icon}</b>${item.name}`;
+        treasureList.appendChild(div);
+      });
+    }
+
+    function renderStats() {
+      scoreEl.textContent = state.score;
+      streakEl.textContent = state.streak;
+      treasuresEl.textContent = `${state.found.size}/${treasures.length}`;
+      leftEl.textContent = Math.max(0, state.tiles.length - state.dug);
+      levelBadge.textContent = `第 ${state.level} 关`;
+    }
+
+    function renderBoard() {
+      board.innerHTML = "";
+      state.tiles.forEach((tile, index) => {
+        const btn = document.createElement("button");
+        btn.className = "tile";
+        btn.type = "button";
+        btn.setAttribute("aria-label", `土地 ${index + 1}`);
+        btn.innerHTML = `<span class="mark">⛏</span>`;
+        btn.addEventListener("click", () => dig(index, btn));
+        board.appendChild(btn);
+      });
+    }
+
+    function setPrompt(title, word, text) {
+      hintLabel.textContent = title;
+      wordEl.textContent = word;
+      meaningEl.textContent = text;
+    }
+
+    function makeChoices(correctCn) {
+      const wrong = shuffle(wordBank.filter((item) => item.cn !== correctCn)).slice(0, 3).map((item) => item.cn);
+      return shuffle([correctCn, ...wrong]);
+    }
+
+    function showWordChallenge(item) {
+      state.current = item;
+      state.locked = true;
+      modeBadge.textContent = "答题中";
+      setPrompt("根据提示选择中文意思", item.word, item.clue);
+      choicesEl.innerHTML = "";
+      makeChoices(item.cn).forEach((choice) => {
+        const btn = document.createElement("button");
+        btn.className = "choice";
+        btn.type = "button";
+        btn.textContent = choice;
+        btn.addEventListener("click", () => answer(choice, btn));
+        choicesEl.appendChild(btn);
+      });
+      messageEl.textContent = "读一读这个单词，再选出正确中文。";
+    }
+
+    function answer(choice, btn) {
+      if (!state.current) return;
+      const correct = choice === state.current.cn;
+      document.querySelectorAll(".choice").forEach((node) => {
+        node.disabled = true;
+        if (node.textContent === state.current.cn) node.classList.add("correct");
+      });
+      if (correct) {
+        state.score += 10 + Math.min(state.streak, 5);
+        state.streak += 1;
+        messageEl.textContent = `答对了！${state.current.word} 是“${state.current.cn}”。`;
+      } else {
+        state.streak = 0;
+        btn.classList.add("wrong");
+        messageEl.textContent = `差一点点，${state.current.word} 的意思是“${state.current.cn}”。`;
+      }
+      state.current = null;
+      state.locked = false;
+      modeBadge.textContent = "继续挖";
+      renderStats();
+      checkWin();
+    }
+
+    function dig(index, btn) {
+      if (state.locked || btn.classList.contains("dug")) return;
+      const tile = state.tiles[index];
+      btn.classList.add("dug");
+      btn.disabled = true;
+      state.dug += 1;
+
+      if (tile.type === "word") {
+        btn.innerHTML = `<span class="mark">ABC</span>`;
+        showWordChallenge(tile.item);
+      } else if (tile.type === "star") {
+        btn.innerHTML = `<span class="mark">⭐</span>`;
+        state.score += 5;
+        modeBadge.textContent = "幸运";
+        setPrompt("挖到星星", "+5", "继续找英文单词，宝藏就在附近。");
+        choicesEl.innerHTML = "";
+        messageEl.textContent = "闪亮星星到手，真不错。";
+      } else if (tile.type === "treasure") {
+        btn.innerHTML = `<span class="mark">${tile.item.icon}</span>`;
+        state.score += 20;
+        state.found.add(tile.index);
+        modeBadge.textContent = "宝物";
+        setPrompt("找到郑州宝物", tile.item.name, "收集全部宝物，成为英语挖宝小队长。");
+        choicesEl.innerHTML = "";
+        messageEl.textContent = `找到${tile.item.name}！`;
+        renderTreasures();
+      } else {
+        btn.innerHTML = `<span class="mark">土</span>`;
+        modeBadge.textContent = "空地";
+        setPrompt("这里是空地", "Try again", "再选一块土地试试。");
+        choicesEl.innerHTML = "";
+        messageEl.textContent = "这里没有宝物，但离胜利更近了一步。";
+      }
+
+      renderStats();
+      checkWin();
+    }
+
+    function checkWin() {
+      if (state.found.size === treasures.length) {
+        modeBadge.textContent = "通关";
+        messageEl.textContent = "全部郑州宝物都找到了！你是今天的英语挖宝冠军。";
+      } else if (state.dug === state.tiles.length && !state.current) {
+        messageEl.textContent = "这张地图挖完了，换一张继续寻找宝物。";
+      }
+    }
+
+    function newMap(resetTreasures = false) {
+      state.level += state.dug > 0 ? 1 : 0;
+      state.dug = 0;
+      state.current = null;
+      state.locked = false;
+      if (resetTreasures) {
+        state.score = 0;
+        state.streak = 0;
+        state.level = 1;
+        state.found.clear();
+      }
+      state.tiles = makeTiles();
+      modeBadge.textContent = "准备";
+      setPrompt("先点一个土地格子", "Dig!", "每块土地下面可能藏着单词、星星或郑州小宝物。");
+      choicesEl.innerHTML = "";
+      messageEl.textContent = "新地图准备好了，开始挖吧。";
+      renderBoard();
+      renderTreasures();
+      renderStats();
+    }
+
+    function speakWord() {
+      const text = state.current ? state.current.word : wordEl.textContent;
+      if (!("speechSynthesis" in window) || !text || text === "Dig!") {
+        messageEl.textContent = "点到英文单词后，再按读单词。";
+        return;
+      }
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "en-US";
+      utterance.rate = 0.82;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+    }
+
+    document.getElementById("nextBtn").addEventListener("click", () => newMap(false));
+    document.getElementById("soundBtn").addEventListener("click", speakWord);
+
+    newMap(true);
+  </script>
+</body>
+</html>
