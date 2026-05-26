@@ -5,787 +5,85 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>郑州英语单词挖宝</title>
   <style>
-    :root {
-      --sky: #dff4ff;
-      --field: #f4d58d;
-      --soil: #8b5a2b;
-      --soil-dark: #68401e;
-      --leaf: #3a8b5a;
-      --leaf-dark: #1f6540;
-      --red: #d84735;
-      --gold: #f8bc3b;
-      --ink: #243244;
-      --muted: #697687;
-      --white: #fffdf8;
-      --line: rgba(36, 50, 68, 0.16);
-      --shadow: 0 18px 45px rgba(61, 42, 22, 0.16);
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
-      color: var(--ink);
-      background:
-        linear-gradient(180deg, rgba(223, 244, 255, 0.95) 0 38%, rgba(255, 241, 194, 0.92) 38% 100%),
-        radial-gradient(circle at 20% 18%, rgba(255,255,255,0.9), transparent 18rem);
-      overflow-x: hidden;
-    }
-
-    .app {
-      width: min(1180px, calc(100% - 28px));
-      margin: 0 auto;
-      padding: 18px 0 28px;
-    }
-
-    .topbar {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 16px;
-      align-items: center;
-      padding: 14px 0 12px;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: clamp(28px, 5vw, 54px);
-      line-height: 1.04;
-      letter-spacing: 0;
-    }
-
-    .subtitle {
-      margin: 8px 0 0;
-      max-width: 720px;
-      font-size: 16px;
-      color: var(--muted);
-      line-height: 1.55;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 110px;
-      height: 42px;
-      padding: 0 16px;
-      border: 2px solid var(--ink);
-      border-radius: 999px;
-      background: var(--white);
-      box-shadow: 4px 4px 0 rgba(36, 50, 68, 0.14);
-      font-weight: 800;
-      white-space: nowrap;
-    }
-
-    .scene {
-      position: relative;
-      min-height: 145px;
-      margin: 4px 0 14px;
-      overflow: hidden;
-      border-bottom: 5px solid rgba(74, 123, 75, 0.34);
-    }
-
-    .sun {
-      position: absolute;
-      right: 7%;
-      top: 10px;
-      width: 86px;
-      height: 86px;
-      border-radius: 50%;
-      background: var(--gold);
-      box-shadow: 0 0 0 12px rgba(248, 188, 59, 0.22);
-    }
-
-    .tower {
-      position: absolute;
-      left: 8%;
-      bottom: 0;
-      width: 110px;
-      height: 128px;
-    }
-
-    .tower::before,
-    .tower::after {
-      content: "";
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      border-left: 42px solid transparent;
-      border-right: 42px solid transparent;
-    }
-
-    .tower::before {
-      bottom: 0;
-      border-bottom: 118px solid #bc7545;
-    }
-
-    .tower::after {
-      bottom: 44px;
-      border-bottom: 74px solid #e0a45e;
-      opacity: 0.95;
-    }
-
-    .tower-cap {
-      position: absolute;
-      left: 20px;
-      top: 4px;
-      width: 70px;
-      height: 22px;
-      border-radius: 50% 50% 0 0;
-      background: var(--red);
-      z-index: 2;
-    }
-
-    .river {
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      height: 38px;
-      background: repeating-linear-gradient(120deg, #63bdd2 0 32px, #8bd5e5 32px 64px);
-      clip-path: polygon(0 46%, 13% 38%, 25% 62%, 40% 42%, 57% 56%, 74% 34%, 100% 50%, 100% 100%, 0 100%);
-      opacity: 0.9;
-    }
-
-    .layout {
-      display: grid;
-      grid-template-columns: minmax(330px, 1fr) 340px;
-      gap: 18px;
-      align-items: start;
-    }
-
-    .game-area,
-    .side {
-      background: rgba(255, 253, 248, 0.82);
-      border: 2px solid var(--line);
-      border-radius: 8px;
-      box-shadow: var(--shadow);
-    }
-
-    .game-area {
-      padding: 16px;
-    }
-
-    .status {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-
-    .metric {
-      min-height: 72px;
-      padding: 10px;
-      border: 2px solid rgba(36, 50, 68, 0.12);
-      border-radius: 8px;
-      background: #ffffff;
-    }
-
-    .metric span {
-      display: block;
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 5px;
-    }
-
-    .metric strong {
-      font-size: 25px;
-      line-height: 1;
-    }
-
-    .board {
-      display: grid;
-      grid-template-columns: repeat(5, minmax(48px, 1fr));
-      gap: 10px;
-      aspect-ratio: 5 / 4;
-      min-height: 318px;
-    }
-
-    .tile {
-      position: relative;
-      display: grid;
-      place-items: center;
-      border: 0;
-      border-radius: 8px;
-      background: linear-gradient(160deg, #a66a34, var(--soil));
-      box-shadow: inset 0 -8px 0 rgba(0,0,0,0.12), 0 5px 0 var(--soil-dark);
-      color: #fff;
-      font-size: clamp(20px, 3vw, 31px);
-      cursor: pointer;
-      transition: transform 150ms ease, filter 150ms ease;
-      overflow: hidden;
-      font-weight: 900;
-    }
-
-    .tile::before {
-      content: "";
-      position: absolute;
-      inset: 8px;
-      border-radius: 7px;
-      background:
-        linear-gradient(135deg, rgba(255,255,255,0.13), transparent 42%),
-        repeating-linear-gradient(35deg, rgba(255,255,255,0.08) 0 7px, transparent 7px 18px);
-    }
-
-    .tile:hover {
-      transform: translateY(-2px);
-      filter: brightness(1.05);
-    }
-
-    .tile:disabled {
-      cursor: default;
-      transform: none;
-    }
-
-    .tile.dug {
-      background: #f3e6c8;
-      color: var(--ink);
-      box-shadow: inset 0 0 0 2px rgba(104, 64, 30, 0.18);
-    }
-
-    .tile.dug::before {
-      opacity: 0;
-    }
-
-    .tile .mark {
-      position: relative;
-      z-index: 1;
-      width: 80%;
-      max-width: 82px;
-      aspect-ratio: 1;
-      display: grid;
-      place-items: center;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.84);
-      box-shadow: inset 0 0 0 2px rgba(36, 50, 68, 0.09);
-    }
-
-    .side {
-      padding: 16px;
-    }
-
-    .panel-title {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-
-    .panel-title h2 {
-      margin: 0;
-      font-size: 22px;
-    }
-
-    .prompt {
-      min-height: 124px;
-      padding: 14px;
-      border-radius: 8px;
-      background: #ffffff;
-      border: 2px dashed rgba(36, 50, 68, 0.22);
-    }
-
-    .prompt small {
-      color: var(--muted);
-      font-weight: 700;
-    }
-
-    .word {
-      margin: 8px 0 4px;
-      font-size: 38px;
-      font-weight: 900;
-      color: var(--red);
-      line-height: 1.1;
-    }
-
-    .meaning {
-      margin: 0;
-      color: var(--muted);
-      line-height: 1.45;
-    }
-
-    .choices {
-      display: grid;
-      gap: 10px;
-      margin-top: 12px;
-    }
-
-    .choice {
-      min-height: 48px;
-      padding: 8px 12px;
-      border: 2px solid rgba(36, 50, 68, 0.16);
-      border-radius: 8px;
-      background: #fff;
-      color: var(--ink);
-      font-size: 16px;
-      font-weight: 800;
-      cursor: pointer;
-      text-align: left;
-      transition: border-color 140ms ease, transform 140ms ease, background 140ms ease;
-    }
-
-    .choice:hover:not(:disabled) {
-      border-color: var(--leaf);
-      transform: translateX(3px);
-    }
-
-    .choice.correct {
-      background: #e7f6df;
-      border-color: var(--leaf);
-    }
-
-    .choice.wrong {
-      background: #ffe3df;
-      border-color: var(--red);
-    }
-
-    .choice:disabled {
-      cursor: default;
-    }
-
-    .actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 14px;
-    }
-
-    .action {
-      min-height: 46px;
-      border: 0;
-      border-radius: 8px;
-      background: var(--leaf);
-      color: #fff;
-      font-weight: 900;
-      font-size: 15px;
-      cursor: pointer;
-      box-shadow: 0 5px 0 var(--leaf-dark);
-    }
-
-    .action.secondary {
-      background: var(--gold);
-      color: #422a11;
-      box-shadow: 0 5px 0 #c78913;
-    }
-
-    .treasure-list {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 9px;
-      margin-top: 14px;
-    }
-
-    .treasure {
-      min-height: 72px;
-      padding: 8px 6px;
-      border-radius: 8px;
-      background: #fff;
-      border: 2px solid rgba(36, 50, 68, 0.12);
-      text-align: center;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.25;
-    }
-
-    .treasure b {
-      display: block;
-      font-size: 28px;
-      margin-bottom: 4px;
-      filter: grayscale(1);
-      opacity: 0.35;
-    }
-
-    .treasure.found {
-      color: var(--ink);
-      border-color: rgba(58, 139, 90, 0.45);
-      background: #f6fff1;
-    }
-
-    .treasure.found b {
-      filter: none;
-      opacity: 1;
-    }
-
-    .message {
-      min-height: 40px;
-      margin-top: 12px;
-      color: var(--ink);
-      font-weight: 800;
-      line-height: 1.45;
-    }
-
-    .footer-note {
-      margin-top: 14px;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.5;
-    }
-
-    @media (max-width: 900px) {
-      .topbar {
-        grid-template-columns: 1fr;
-      }
-
-      .badge {
-        width: max-content;
-      }
-
-      .layout {
-        grid-template-columns: 1fr;
-      }
-
-      .side {
-        order: -1;
-      }
-
-      .status {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    @media (max-width: 520px) {
-      .app {
-        width: min(100% - 18px, 1180px);
-        padding-top: 10px;
-      }
-
-      .scene {
-        min-height: 112px;
-      }
-
-      .sun {
-        width: 62px;
-        height: 62px;
-      }
-
-      .tower {
-        transform: scale(0.78);
-        transform-origin: left bottom;
-      }
-
-      .game-area,
-      .side {
-        padding: 12px;
-      }
-
-      .board {
-        grid-template-columns: repeat(4, minmax(54px, 1fr));
-        aspect-ratio: auto;
-        min-height: auto;
-      }
-
-      .tile {
-        min-height: 68px;
-      }
-
-      .actions {
-        grid-template-columns: 1fr;
-      }
-    }
+    :root{--sky:#dff5ff;--paper:#fffaf0;--ink:#263449;--muted:#657184;--leaf:#2f8a57;--red:#d84a3a;--gold:#f7b733;--soil:#8a552b;--line:rgba(38,52,73,.16)}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:"Microsoft YaHei","Segoe UI",sans-serif;color:var(--ink);background:linear-gradient(#dff5ff 0 34%,#fff0b8 34% 100%)}button,input,select{font:inherit}
+    .app{width:min(1120px,calc(100% - 24px));margin:auto;padding:18px 0 28px}.top{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center}.pill{display:inline-flex;align-items:center;justify-content:center;height:38px;padding:0 14px;border:2px solid var(--ink);border-radius:999px;background:#fff;font-weight:900;box-shadow:4px 4px 0 rgba(38,52,73,.12)}
+    h1{margin:0;font-size:clamp(30px,5vw,56px);line-height:1.06}.sub{margin:8px 0 0;color:var(--muted);line-height:1.55}.scene{position:relative;height:116px;margin:8px 0 14px;overflow:hidden;border-bottom:5px solid rgba(47,138,87,.3)}.sun{position:absolute;right:7%;top:10px;width:74px;height:74px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 14px rgba(247,183,51,.22)}.tower{position:absolute;left:8%;bottom:0;width:94px;height:112px}.tower:before,.tower:after{content:"";position:absolute;left:50%;transform:translateX(-50%);border-left:36px solid transparent;border-right:36px solid transparent}.tower:before{bottom:0;border-bottom:104px solid #b87543}.tower:after{bottom:38px;border-bottom:66px solid #e2a75f}.river{position:absolute;left:0;right:0;bottom:0;height:34px;background:repeating-linear-gradient(120deg,#63bdd2 0 28px,#8bd5e5 28px 56px);clip-path:polygon(0 50%,15% 36%,30% 58%,47% 42%,65% 60%,82% 36%,100% 52%,100% 100%,0 100%)}
+    .layout{display:grid;grid-template-columns:minmax(320px,1fr) 360px;gap:16px}.main,.side{background:rgba(255,250,240,.9);border:2px solid var(--line);border-radius:8px;box-shadow:0 18px 38px rgba(80,55,24,.14)}.main,.side{padding:14px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:12px}.metric{min-height:68px;padding:9px;border:2px solid var(--line);border-radius:8px;background:#fff}.metric span{display:block;color:var(--muted);font-size:13px}.metric b{font-size:25px}
+    .courses{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}.course{min-height:46px;border:2px solid var(--line);border-radius:8px;background:#fff;font-weight:900;cursor:pointer}.course.active{background:#e8f7df;border-color:var(--leaf)}.board{display:grid;grid-template-columns:repeat(5,1fr);gap:9px}.tile{aspect-ratio:1;border:0;border-radius:8px;background:linear-gradient(160deg,#a86934,var(--soil));box-shadow:inset 0 -8px 0 rgba(0,0,0,.14),0 4px 0 #623818;color:#fff;font-size:28px;font-weight:900;cursor:pointer}.tile.dug{background:#f2dfbd;color:var(--ink);box-shadow:inset 0 0 0 2px rgba(98,56,24,.18)}
+    .head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}.head h2{margin:0;font-size:22px}.prompt{min-height:132px;padding:13px;border:2px dashed rgba(38,52,73,.25);border-radius:8px;background:#fff}.hint{color:var(--muted);font-weight:900;font-size:13px}.word{margin:8px 0 5px;color:var(--red);font-size:36px;font-weight:900;line-height:1.08}.meaning{margin:0;color:var(--muted);line-height:1.5}.choices{display:grid;gap:9px;margin-top:12px}.choice{min-height:46px;padding:8px 12px;border:2px solid var(--line);border-radius:8px;background:#fff;text-align:left;font-weight:900;cursor:pointer}.choice:hover:not(:disabled){border-color:var(--leaf)}.choice.ok{background:#e8f7df;border-color:var(--leaf)}.choice.no{background:#ffe2df;border-color:var(--red)}
+    .spell{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:12px}.spell input{min-height:46px;padding:0 12px;border:2px solid var(--line);border-radius:8px}.spell button,.action{min-height:46px;border:0;border-radius:8px;background:var(--leaf);color:#fff;font-weight:900;cursor:pointer;box-shadow:0 4px 0 #1d633b}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.action.gold{background:var(--gold);color:#3f2b12;box-shadow:0 4px 0 #bd7d13}.msg{min-height:44px;margin-top:10px;font-weight:900;line-height:1.45}.pet{margin-top:12px;padding:10px;border:2px solid var(--line);border-radius:8px;background:#fff;line-height:1.45}.pet b{font-size:26px}.note{margin:10px 0 0;color:var(--muted);font-size:13px;line-height:1.5}
+    @media(max-width:880px){.top,.layout{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.courses{grid-template-columns:repeat(2,1fr)}.side{order:-1}}@media(max-width:520px){.app{width:calc(100% - 16px)}.board{grid-template-columns:repeat(4,1fr)}.actions,.spell{grid-template-columns:1fr}.tile{min-height:64px}.scene{height:92px}}
   </style>
 </head>
 <body>
   <main class="app">
-    <header class="topbar">
+    <header class="top">
       <div>
         <h1>郑州英语单词挖宝</h1>
-        <p class="subtitle">点开土地格子，读英文单词，根据中文提示选答案。答对越多，越快找到黄河、二七塔和少林功夫宝物。</p>
+        <p class="sub">每一课是一张地图：挖开格子，完成英文选中文、中文选英文、看中文拼英文。答对加星星和能量豆，进度会自动保存在这台电脑上。</p>
       </div>
-      <div class="badge" id="levelBadge">第 1 关</div>
+      <div class="pill">新概念英语一</div>
     </header>
-
-    <section class="scene" aria-label="郑州主题场景">
-      <div class="sun"></div>
-      <div class="tower"><div class="tower-cap"></div></div>
-      <div class="river"></div>
-    </section>
-
+    <section class="scene"><div class="sun"></div><div class="tower"></div><div class="river"></div></section>
     <section class="layout">
-      <div class="game-area">
-        <div class="status">
-          <div class="metric"><span>星星</span><strong id="score">0</strong></div>
-          <div class="metric"><span>宝物</span><strong id="treasures">0/6</strong></div>
-          <div class="metric"><span>连对</span><strong id="streak">0</strong></div>
-          <div class="metric"><span>剩余</span><strong id="left">20</strong></div>
+      <div class="main">
+        <div class="stats">
+          <div class="metric"><span>总星星</span><b id="score">0</b></div>
+          <div class="metric"><span>能量豆</span><b id="beans">0</b></div>
+          <div class="metric"><span>本课宝物</span><b id="found">0/0</b></div>
+          <div class="metric"><span>连对</span><b id="streak">0</b></div>
         </div>
+        <div class="courses" id="courses"></div>
         <div class="board" id="board" aria-label="挖宝地图"></div>
       </div>
-
       <aside class="side">
-        <div class="panel-title">
-          <h2>单词挑战</h2>
-          <span class="badge" id="modeBadge">准备</span>
-        </div>
-
+        <div class="head"><h2>单词挑战</h2><span class="pill" id="badge">准备</span></div>
         <div class="prompt">
-          <small id="hintLabel">先点一个土地格子</small>
+          <div class="hint" id="hint">先选一课，再挖一个土地格子</div>
           <div class="word" id="word">Dig!</div>
-          <p class="meaning" id="meaning">每块土地下面可能藏着单词、星星或郑州小宝物。</p>
+          <p class="meaning" id="meaning">每块土地下面可能藏着单词题、星星或郑州小宝物。</p>
         </div>
-
         <div class="choices" id="choices"></div>
-
         <div class="actions">
-          <button class="action" id="nextBtn" type="button">换一张地图</button>
-          <button class="action secondary" id="soundBtn" type="button">读单词</button>
+          <button class="action" id="speak" type="button">读单词</button>
+          <button class="action gold" id="reset" type="button">重置本课</button>
         </div>
-
-        <div class="treasure-list" id="treasureList"></div>
-        <div class="message" id="message">准备好了吗？从地图里挖出第一个英文单词吧。</div>
-        <p class="footer-note">单词难度按小学三年级常见主题设计：颜色、动物、食物、家庭、学校、动作和郑州生活场景。</p>
+        <div class="pet"><b id="petIcon">🐣</b> <strong id="petName">小豆</strong><br><span id="petText">I can learn with you.</span></div>
+        <div class="msg" id="msg">准备好了就开挖吧。</div>
+        <p class="note">拼写题大小写不敏感。答对：+10 星星、+2 能量豆、宠物经验 +3；答错也会鼓励复习。</p>
       </aside>
     </section>
   </main>
-
   <script>
-    const wordBank = [
-      { word: "river", cn: "河流", clue: "郑州北边有一条很有名的大河。" },
-      { word: "tower", cn: "塔", clue: "二七纪念塔里的 tower 是这个意思。" },
-      { word: "train", cn: "火车", clue: "郑州是重要的铁路城市。" },
-      { word: "school", cn: "学校", clue: "每天背着书包去的地方。" },
-      { word: "pencil", cn: "铅笔", clue: "写英语单词常用它。" },
-      { word: "book", cn: "书", clue: "里面有故事和知识。" },
-      { word: "apple", cn: "苹果", clue: "红红的水果。" },
-      { word: "noodle", cn: "面条", clue: "烩面里常见的长长食物。" },
-      { word: "water", cn: "水", clue: "口渴时最需要。" },
-      { word: "yellow", cn: "黄色", clue: "黄河的 yellow 是这个颜色。" },
-      { word: "green", cn: "绿色", clue: "树叶和草地常见的颜色。" },
-      { word: "red", cn: "红色", clue: "国旗的主要颜色。" },
-      { word: "friend", cn: "朋友", clue: "一起玩、一起学习的人。" },
-      { word: "family", cn: "家庭", clue: "爸爸妈妈和孩子组成它。" },
-      { word: "mother", cn: "妈妈", clue: "mum 的正式说法。" },
-      { word: "father", cn: "爸爸", clue: "dad 的正式说法。" },
-      { word: "teacher", cn: "老师", clue: "帮助你学习的人。" },
-      { word: "student", cn: "学生", clue: "在学校学习的人。" },
-      { word: "happy", cn: "开心的", clue: "找到宝藏时的心情。" },
-      { word: "strong", cn: "强壮的", clue: "少林功夫让人想到这个词。" },
-      { word: "jump", cn: "跳", clue: "体育课上常做的动作。" },
-      { word: "run", cn: "跑", clue: "操场上快速移动。" },
-      { word: "sing", cn: "唱歌", clue: "音乐课上会做的事。" },
-      { word: "draw", cn: "画画", clue: "美术课上会做的事。" }
-    ];
-
-    const treasures = [
-      { icon: "🏯", name: "二七塔" },
-      { icon: "🌊", name: "黄河浪花" },
-      { icon: "🚆", name: "郑州火车" },
-      { icon: "🥣", name: "烩面碗" },
-      { icon: "🥋", name: "功夫徽章" },
-      { icon: "📚", name: "单词书" }
-    ];
-
-    const state = {
-      score: 0,
-      streak: 0,
-      level: 1,
-      dug: 0,
-      found: new Set(),
-      current: null,
-      locked: false,
-      tiles: []
-    };
-
-    const board = document.getElementById("board");
-    const choicesEl = document.getElementById("choices");
-    const scoreEl = document.getElementById("score");
-    const treasuresEl = document.getElementById("treasures");
-    const streakEl = document.getElementById("streak");
-    const leftEl = document.getElementById("left");
-    const wordEl = document.getElementById("word");
-    const meaningEl = document.getElementById("meaning");
-    const hintLabel = document.getElementById("hintLabel");
-    const messageEl = document.getElementById("message");
-    const levelBadge = document.getElementById("levelBadge");
-    const modeBadge = document.getElementById("modeBadge");
-    const treasureList = document.getElementById("treasureList");
-
-    function shuffle(items) {
-      return [...items].sort(() => Math.random() - 0.5);
-    }
-
-    function pickWords(count) {
-      return shuffle(wordBank).slice(0, count);
-    }
-
-    function makeTiles() {
-      const words = pickWords(12).map((item) => ({ type: "word", item }));
-      const stars = Array.from({ length: 5 }, () => ({ type: "star" }));
-      const treasureIndex = state.found.size < treasures.length ? state.found.size : Math.floor(Math.random() * treasures.length);
-      const treasure = [{ type: "treasure", item: treasures[treasureIndex], index: treasureIndex }];
-      const empty = Array.from({ length: 2 }, () => ({ type: "empty" }));
-      return shuffle([...words, ...stars, ...treasure, ...empty]);
-    }
-
-    function renderTreasures() {
-      treasureList.innerHTML = "";
-      treasures.forEach((item, index) => {
-        const div = document.createElement("div");
-        div.className = "treasure" + (state.found.has(index) ? " found" : "");
-        div.innerHTML = `<b>${item.icon}</b>${item.name}`;
-        treasureList.appendChild(div);
-      });
-    }
-
-    function renderStats() {
-      scoreEl.textContent = state.score;
-      streakEl.textContent = state.streak;
-      treasuresEl.textContent = `${state.found.size}/${treasures.length}`;
-      leftEl.textContent = Math.max(0, state.tiles.length - state.dug);
-      levelBadge.textContent = `第 ${state.level} 关`;
-    }
-
-    function renderBoard() {
-      board.innerHTML = "";
-      state.tiles.forEach((tile, index) => {
-        const btn = document.createElement("button");
-        btn.className = "tile";
-        btn.type = "button";
-        btn.setAttribute("aria-label", `土地 ${index + 1}`);
-        btn.innerHTML = `<span class="mark">⛏</span>`;
-        btn.addEventListener("click", () => dig(index, btn));
-        board.appendChild(btn);
-      });
-    }
-
-    function setPrompt(title, word, text) {
-      hintLabel.textContent = title;
-      wordEl.textContent = word;
-      meaningEl.textContent = text;
-    }
-
-    function makeChoices(correctCn) {
-      const wrong = shuffle(wordBank.filter((item) => item.cn !== correctCn)).slice(0, 3).map((item) => item.cn);
-      return shuffle([correctCn, ...wrong]);
-    }
-
-    function showWordChallenge(item) {
-      state.current = item;
-      state.locked = true;
-      modeBadge.textContent = "答题中";
-      setPrompt("根据提示选择中文意思", item.word, item.clue);
-      choicesEl.innerHTML = "";
-      makeChoices(item.cn).forEach((choice) => {
-        const btn = document.createElement("button");
-        btn.className = "choice";
-        btn.type = "button";
-        btn.textContent = choice;
-        btn.addEventListener("click", () => answer(choice, btn));
-        choicesEl.appendChild(btn);
-      });
-      messageEl.textContent = "读一读这个单词，再选出正确中文。";
-    }
-
-    function answer(choice, btn) {
-      if (!state.current) return;
-      const correct = choice === state.current.cn;
-      document.querySelectorAll(".choice").forEach((node) => {
-        node.disabled = true;
-        if (node.textContent === state.current.cn) node.classList.add("correct");
-      });
-      if (correct) {
-        state.score += 10 + Math.min(state.streak, 5);
-        state.streak += 1;
-        messageEl.textContent = `答对了！${state.current.word} 是“${state.current.cn}”。`;
-      } else {
-        state.streak = 0;
-        btn.classList.add("wrong");
-        messageEl.textContent = `差一点点，${state.current.word} 的意思是“${state.current.cn}”。`;
-      }
-      state.current = null;
-      state.locked = false;
-      modeBadge.textContent = "继续挖";
-      renderStats();
-      checkWin();
-    }
-
-    function dig(index, btn) {
-      if (state.locked || btn.classList.contains("dug")) return;
-      const tile = state.tiles[index];
-      btn.classList.add("dug");
-      btn.disabled = true;
-      state.dug += 1;
-
-      if (tile.type === "word") {
-        btn.innerHTML = `<span class="mark">ABC</span>`;
-        showWordChallenge(tile.item);
-      } else if (tile.type === "star") {
-        btn.innerHTML = `<span class="mark">⭐</span>`;
-        state.score += 5;
-        modeBadge.textContent = "幸运";
-        setPrompt("挖到星星", "+5", "继续找英文单词，宝藏就在附近。");
-        choicesEl.innerHTML = "";
-        messageEl.textContent = "闪亮星星到手，真不错。";
-      } else if (tile.type === "treasure") {
-        btn.innerHTML = `<span class="mark">${tile.item.icon}</span>`;
-        state.score += 20;
-        state.found.add(tile.index);
-        modeBadge.textContent = "宝物";
-        setPrompt("找到郑州宝物", tile.item.name, "收集全部宝物，成为英语挖宝小队长。");
-        choicesEl.innerHTML = "";
-        messageEl.textContent = `找到${tile.item.name}！`;
-        renderTreasures();
-      } else {
-        btn.innerHTML = `<span class="mark">土</span>`;
-        modeBadge.textContent = "空地";
-        setPrompt("这里是空地", "Try again", "再选一块土地试试。");
-        choicesEl.innerHTML = "";
-        messageEl.textContent = "这里没有宝物，但离胜利更近了一步。";
-      }
-
-      renderStats();
-      checkWin();
-    }
-
-    function checkWin() {
-      if (state.found.size === treasures.length) {
-        modeBadge.textContent = "通关";
-        messageEl.textContent = "全部郑州宝物都找到了！你是今天的英语挖宝冠军。";
-      } else if (state.dug === state.tiles.length && !state.current) {
-        messageEl.textContent = "这张地图挖完了，换一张继续寻找宝物。";
-      }
-    }
-
-    function newMap(resetTreasures = false) {
-      state.level += state.dug > 0 ? 1 : 0;
-      state.dug = 0;
-      state.current = null;
-      state.locked = false;
-      if (resetTreasures) {
-        state.score = 0;
-        state.streak = 0;
-        state.level = 1;
-        state.found.clear();
-      }
-      state.tiles = makeTiles();
-      modeBadge.textContent = "准备";
-      setPrompt("先点一个土地格子", "Dig!", "每块土地下面可能藏着单词、星星或郑州小宝物。");
-      choicesEl.innerHTML = "";
-      messageEl.textContent = "新地图准备好了，开始挖吧。";
-      renderBoard();
-      renderTreasures();
-      renderStats();
-    }
-
-    function speakWord() {
-      const text = state.current ? state.current.word : wordEl.textContent;
-      if (!("speechSynthesis" in window) || !text || text === "Dig!") {
-        messageEl.textContent = "点到英文单词后，再按读单词。";
-        return;
-      }
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = "en-US";
-      utterance.rate = 0.82;
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(utterance);
-    }
-
-    document.getElementById("nextBtn").addEventListener("click", () => newMap(false));
-    document.getElementById("soundBtn").addEventListener("click", speakWord);
-
-    newMap(true);
+    const lessons=[
+      {id:"l1",title:"Lesson 1",treasure:"二七塔徽章",words:[["excuse","原谅"],["me","我"],["yes","是的"],["is","是"],["this","这"],["your","你的"],["handbag","手提包"],["pardon","请再说一遍"],["it","它"],["thank","感谢"],["you","你"],["very much","非常"]]},
+      {id:"l3",title:"Lesson 3",treasure:"黄河浪花",words:[["pen","钢笔"],["pencil","铅笔"],["book","书"],["watch","手表"],["coat","上衣"],["dress","连衣裙"],["skirt","短裙"],["shirt","衬衫"],["car","汽车"],["house","房子"]]},
+      {id:"l5",title:"Lesson 5",treasure:"火车票",words:[["umbrella","伞"],["please","请"],["here","这里"],["my","我的"],["ticket","票"],["number","号码"],["five","五"],["sorry","对不起"],["sir","先生"],["cloakroom","衣帽存放处"]]},
+      {id:"l7",title:"Lesson 7",treasure:"少林能量带",words:[["suit","一套衣服"],["school","学校"],["teacher","老师"],["son","儿子"],["daughter","女儿"]]}
+    ].map(l=>({...l,words:l.words.map(([word,cn])=>({word,cn}))}));
+    const key="zz_word_treasure_new_concept_v1";
+    const saved=JSON.parse(localStorage.getItem(key)||"{}");
+    const state={course:saved.course||"l1",score:saved.score||0,beans:saved.beans||0,streak:0,petXp:saved.petXp||0,dug:saved.dug||{},current:null,locked:false,tiles:[]};
+    const $=id=>document.getElementById(id);
+    const board=$("board"),choices=$("choices"),courses=$("courses");
+    function save(){localStorage.setItem(key,JSON.stringify({course:state.course,score:state.score,beans:state.beans,petXp:state.petXp,dug:state.dug}))}
+    function lesson(){return lessons.find(x=>x.id===state.course)}
+    function shuffle(a){return [...a].sort(()=>Math.random()-.5)}
+    function norm(s){return String(s).trim().toLowerCase().replace(/\s+/g," ")}
+    function renderCourses(){courses.innerHTML="";lessons.forEach(l=>{const b=document.createElement("button");b.className="course"+(l.id===state.course?" active":"");b.textContent=l.title;b.onclick=()=>{state.course=l.id;newMap(false)};courses.appendChild(b)})}
+    function makeTiles(){const l=lesson(),wordTiles=l.words.map(w=>({type:"word",item:w}));const extras=[{type:"treasure"},{type:"star"},{type:"star"},{type:"empty"}];return shuffle([...wordTiles,...extras])}
+    function newMap(reset){const l=lesson();if(reset)state.dug[l.id]=[];state.tiles=makeTiles();state.current=null;state.locked=false;renderCourses();renderBoard();setPrompt("先点一个土地格子","Dig!",`${l.title} 地图：挖完这一课的单词就能拿到「${l.treasure}」。`);choices.innerHTML="";$("badge").textContent="准备";$("msg").textContent="新地图准备好了。";renderStats();save()}
+    function renderBoard(){const dug=new Set(state.dug[state.course]||[]);board.innerHTML="";state.tiles.forEach((t,i)=>{const b=document.createElement("button");b.className="tile"+(dug.has(i)?" dug":"");b.disabled=dug.has(i);b.textContent=dug.has(i)?"✓":"⛏";b.onclick=()=>dig(i,b);board.appendChild(b)})}
+    function renderStats(){const l=lesson(),dug=state.dug[l.id]||[];$("score").textContent=state.score;$("beans").textContent=state.beans;$("streak").textContent=state.streak;$("found").textContent=`${Math.min(dug.length,l.words.length)}/${l.words.length}`;const level=Math.floor(state.petXp/20)+1;$("petIcon").textContent=level>2?"🐥":"🐣";$("petName").textContent=`小豆 Lv.${level}`;$("petText").textContent=level>2?"Good job! I like English.":"I can learn with you."}
+    function setPrompt(h,w,m){$("hint").textContent=h;$("word").textContent=w;$("meaning").textContent=m}
+    function dig(i,b){if(state.locked)return;const l=lesson();state.dug[l.id]=[...(state.dug[l.id]||[]),i];b.classList.add("dug");b.disabled=true;const t=state.tiles[i];if(t.type==="star"){state.score+=3;state.beans+=1;b.textContent="⭐";setPrompt("挖到星星","+3","继续找单词宝藏。");$("msg").textContent="闪亮星星到手。"}else if(t.type==="treasure"){state.score+=12;state.beans+=3;b.textContent="🎁";setPrompt("找到课程宝物",l.treasure,"这是一课地图的奖励。");$("msg").textContent=`获得 ${l.treasure}！`}else if(t.type==="empty"){b.textContent="土";setPrompt("这里是空地","Try again","再挖一格试试。");$("msg").textContent="没有宝物，也算探索了一步。"}else{b.textContent="ABC";challenge(t.item)}renderStats();save()}
+    function challenge(item){state.locked=true;const mode=shuffle(["en-cn","cn-en","spell-cn"])[0];state.current={...item,mode};$("badge").textContent="答题中";choices.innerHTML="";if(mode==="en-cn"){setPrompt("英文选中文",item.word,"选择这个英文单词的中文意思。");choiceButtons(item.cn,shuffle(lesson().words.filter(w=>w.cn!==item.cn)).slice(0,3).map(w=>w.cn))}else if(mode==="cn-en"){setPrompt("中文选英文",item.cn,"选择正确的英文单词。");choiceButtons(item.word,shuffle(lesson().words.filter(w=>w.word!==item.word)).slice(0,3).map(w=>w.word))}else{setPrompt("看中文拼英文",item.cn,"在下面输入对应英文。");const box=document.createElement("div");box.className="spell";box.innerHTML='<input id="spellInput" autocomplete="off" placeholder="输入英文"><button type="button">提交</button>';choices.appendChild(box);box.querySelector("button").onclick=()=>answer(box.querySelector("input").value);box.querySelector("input").addEventListener("keydown",e=>{if(e.key==="Enter")answer(e.target.value)});box.querySelector("input").focus()}$("msg").textContent="认真看题，答对就有能量豆。"}
+    function choiceButtons(correct,wrong){shuffle([correct,...wrong]).forEach(text=>{const b=document.createElement("button");b.className="choice";b.textContent=text;b.onclick=()=>answer(text,b);choices.appendChild(b)})}
+    function answer(value,btn){const c=state.current;if(!c)return;const correct=c.mode==="spell-cn"?norm(value)===norm(c.word):value===(c.mode==="en-cn"?c.cn:c.word);document.querySelectorAll(".choice").forEach(b=>{b.disabled=true;if(b.textContent===(c.mode==="en-cn"?c.cn:c.word))b.classList.add("ok")});if(correct){state.score+=10+Math.min(state.streak,5);state.beans+=2;state.petXp+=3;state.streak++;$("msg").textContent=`答对了！${c.word} = ${c.cn}`;if(btn)btn.classList.add("ok")}else{state.streak=0;if(btn)btn.classList.add("no");$("msg").textContent=`再记一次：${c.word} = ${c.cn}`}state.current=null;state.locked=false;$("badge").textContent="继续挖";renderStats();save()}
+    $("reset").onclick=()=>newMap(true);
+    $("speak").onclick=()=>{const text=state.current?.word||$("word").textContent;if(!("speechSynthesis" in window)||!text||text==="Dig!")return $("msg").textContent="挖到单词后再读。";const u=new SpeechSynthesisUtterance(text);u.lang="en-US";u.rate=.82;speechSynthesis.cancel();speechSynthesis.speak(u)};
+    newMap(false);
   </script>
 </body>
 </html>
